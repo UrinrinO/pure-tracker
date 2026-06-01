@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import Sidebar from '@/components/Sidebar'
+import AppLayout from '@/components/AppLayout'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -16,11 +16,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (profile?.role !== 'admin') redirect('/portal')
 
   return (
-    <div style={{ display: 'flex' }}>
-      <Sidebar role="admin" userName={profile?.full_name ?? user.email ?? 'Admin'} />
-      <main className="main-content" style={{ flex: 1 }}>
-        {children}
-      </main>
-    </div>
+    <AppLayout role="admin" userName={profile?.full_name ?? user.email ?? 'Admin'}>
+      {children}
+    </AppLayout>
   )
 }

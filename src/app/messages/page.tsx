@@ -7,7 +7,7 @@ export default async function MessagesPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const [{ data: comments }, { data: profile }] = await Promise.all([
+  const [{ data: comments }, { data: profile }, { data: profiles }] = await Promise.all([
     supabase
       .from('comments')
       .select('*, author:profiles(id, full_name, email, role)')
@@ -15,6 +15,11 @@ export default async function MessagesPage() {
       .is('task_id', null) // project-wide thread
       .order('created_at', { ascending: true }),
     supabase.from('profiles').select('id, full_name, role').eq('id', user!.id).single(),
+    supabase
+      .from('profiles')
+      .select('id, full_name, role, email')
+      .neq('id', user!.id)
+      .order('full_name'),
   ])
 
   return (
@@ -24,6 +29,7 @@ export default async function MessagesPage() {
       currentUserName={profile?.full_name ?? user!.email ?? 'User'}
       currentUserRole={profile?.role ?? 'stakeholder'}
       projectId={PROJECT_ID}
+      profiles={profiles ?? []}
     />
   )
 }

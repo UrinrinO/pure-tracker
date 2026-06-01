@@ -121,7 +121,7 @@ Deno.serve(async (_req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'Pure White Tracker <tracker@yourdomain.com>',
+          from: 'Pure White Tracker <tracker@urinrin.com>',
           to: [profile.email],
           subject: `[Pure White] ${tasksToAlert.length} task(s) are overdue`,
           html,

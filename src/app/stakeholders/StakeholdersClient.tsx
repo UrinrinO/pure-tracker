@@ -67,6 +67,7 @@ export default function StakeholdersClient({
   }
 
   async function revokeInvitation(id: string) {
+    if (!confirm("Are you sure you want to revoke this invitation?")) return
     await supabase.from('invitations').delete().eq('id', id)
     setInvitations(inv => inv.filter(i => i.id !== id))
   }

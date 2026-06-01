@@ -6,7 +6,7 @@ import {
   statusLabel, statusBadgeClass, priorityBadgeClass, priorityLabel,
   isOverdue, formatDate,
 } from '@/lib/utils'
-import { Plus, Search, X, Filter, AlertTriangle, Edit2, Trash2, MessageSquare } from 'lucide-react'
+import { Plus, Search, X, Filter, AlertTriangle, Edit2, Trash2, MessageSquare, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 
 const STATUS_OPTIONS: TaskStatus[] = ['not_started', 'in_progress', 'blocked', 'done']
 const PRIORITY_OPTIONS: TaskPriority[] = ['critical', 'high', 'med', 'low']
@@ -32,6 +32,10 @@ export default function TasksClient({
   const [editing, setEditing] = useState<Task | null>(null)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
+
+  // Sorting state
+  const [sortField, setSortField] = useState<string | null>(null)
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
   // Form state
   const [form, setForm] = useState({
@@ -93,6 +97,7 @@ export default function TasksClient({
   }
 
   async function handleDelete(id: string) {
+    if (!confirm("Are you sure you want to delete this task? This action cannot be undone.")) return
     setDeleting(id)
     await supabase.from('tasks').delete().eq('id', id)
     setTasks(ts => ts.filter(t => t.id !== id))
@@ -104,9 +109,30 @@ export default function TasksClient({
     if (data) setTasks(ts => ts.map(t => t.id === task.id ? data : t))
   }
 
-  // Filtered tasks
+  // Sorting helpers
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(d => (d === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortField(field)
+      setSortDirection('asc')
+    }
+  }
+
+  const renderSortIndicator = (field: string) => {
+    if (sortField !== field) {
+      return <span className="sort-indicator"><ArrowUpDown size={11} style={{ opacity: 0.35 }} /></span>
+    }
+    return (
+      <span className="sort-indicator">
+        {sortDirection === 'asc' ? <ArrowUp size={11} /> : <ArrowDown size={11} />}
+      </span>
+    )
+  }
+
+  // Filtered and Sorted tasks
   const filtered = useMemo(() => {
-    return tasks.filter(t => {
+    let result = tasks.filter(t => {
       if (search && !t.title.toLowerCase().includes(search.toLowerCase()) &&
           !(t.task_code?.toLowerCase().includes(search.toLowerCase()))) return false
       if (filterStatus && t.status !== filterStatus) return false
@@ -114,7 +140,46 @@ export default function TasksClient({
       if (filterMilestone && t.milestone_id !== filterMilestone) return false
       return true
     })
-  }, [tasks, search, filterStatus, filterPriority, filterMilestone])
+
+    if (sortField) {
+      result = [...result].sort((a, b) => {
+        let valA: any = ''
+        let valB: any = ''
+
+        if (sortField === 'task_code') {
+          valA = a.task_code || ''
+          valB = b.task_code || ''
+        } else if (sortField === 'title') {
+          valA = a.title || ''
+          valB = b.title || ''
+        } else if (sortField === 'milestone') {
+          const mA = milestones.find(m => m.id === a.milestone_id)?.title || ''
+          const mB = milestones.find(m => m.id === b.milestone_id)?.title || ''
+          valA = mA
+          valB = mB
+        } else if (sortField === 'owner') {
+          valA = a.owner || ''
+          valB = b.owner || ''
+        } else if (sortField === 'priority') {
+          const priorityRank = { critical: 4, high: 3, med: 2, low: 1 }
+          valA = priorityRank[a.priority] || 0
+          valB = priorityRank[b.priority] || 0
+        } else if (sortField === 'status') {
+          const statusRank = { not_started: 1, in_progress: 2, blocked: 3, done: 4 }
+          valA = statusRank[a.status] || 0
+          valB = statusRank[b.status] || 0
+        } else if (sortField === 'due_date') {
+          valA = a.due_date || '9999-12-31'
+          valB = b.due_date || '9999-12-31'
+        }
+
+        if (valA < valB) return sortDirection === 'asc' ? -1 : 1
+        if (valA > valB) return sortDirection === 'asc' ? 1 : -1
+        return 0
+      })
+    }
+    return result
+  }, [tasks, search, filterStatus, filterPriority, filterMilestone, sortField, sortDirection, milestones])
 
   const overdueCount = filtered.filter(t => isOverdue(t.due_date, t.status)).length
 
@@ -167,13 +232,27 @@ export default function TasksClient({
           <table className="data-table">
             <thead>
               <tr>
-                <th style={{ width: 60 }}>ID</th>
-                <th>Task</th>
-                <th>Milestone</th>
-                <th style={{ width: 100 }}>Owner</th>
-                <th style={{ width: 100 }}>Priority</th>
-                <th style={{ width: 120 }}>Status</th>
-                <th style={{ width: 100 }}>Due Date</th>
+                <th className="sort-header" style={{ width: 85 }} onClick={() => handleSort('task_code')}>
+                  ID {renderSortIndicator('task_code')}
+                </th>
+                <th className="sort-header" onClick={() => handleSort('title')}>
+                  Task {renderSortIndicator('title')}
+                </th>
+                <th className="sort-header" onClick={() => handleSort('milestone')}>
+                  Milestone {renderSortIndicator('milestone')}
+                </th>
+                <th className="sort-header" style={{ width: 110 }} onClick={() => handleSort('owner')}>
+                  Owner {renderSortIndicator('owner')}
+                </th>
+                <th className="sort-header" style={{ width: 115 }} onClick={() => handleSort('priority')}>
+                  Priority {renderSortIndicator('priority')}
+                </th>
+                <th className="sort-header" style={{ width: 130 }} onClick={() => handleSort('status')}>
+                  Status {renderSortIndicator('status')}
+                </th>
+                <th className="sort-header" style={{ width: 120 }} onClick={() => handleSort('due_date')}>
+                  Due Date {renderSortIndicator('due_date')}
+                </th>
                 <th style={{ width: 80 }}>Actions</th>
               </tr>
             </thead>
