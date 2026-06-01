@@ -32,6 +32,7 @@ export default function TasksClient({
   const [editing, setEditing] = useState<Task | null>(null)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [deletingTask, setDeletingTask] = useState<Task | null>(null)
 
   // Sorting state
   const [sortField, setSortField] = useState<string | null>(null)
@@ -97,7 +98,6 @@ export default function TasksClient({
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Are you sure you want to delete this task? This action cannot be undone.")) return
     setDeleting(id)
     await supabase.from('tasks').delete().eq('id', id)
     setTasks(ts => ts.filter(t => t.id !== id))
@@ -338,7 +338,7 @@ export default function TasksClient({
                         </button>
                         <button
                           className="btn btn-danger btn-icon btn-sm"
-                          onClick={() => handleDelete(task.id)}
+                          onClick={() => setDeletingTask(task)}
                           disabled={deleting === task.id}
                           title="Delete"
                         >
@@ -442,6 +442,55 @@ export default function TasksClient({
               <button className="btn btn-ghost" onClick={() => setShowModal(false)}>Cancel</button>
               <button className="btn btn-primary" onClick={handleSave} disabled={saving || !form.title}>
                 {saving ? 'Saving…' : editing ? 'Save Changes' : 'Create Task'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deletingTask && (
+        <div className="modal-overlay" onClick={() => setDeletingTask(null)}>
+          <div className="modal fade-in" style={{ maxWidth: 400, textAlign: 'center', padding: '32px 24px' }}>
+            <div style={{
+              width: 56,
+              height: 56,
+              borderRadius: '50%',
+              background: 'rgba(180, 69, 47, 0.08)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#B4452F',
+              margin: '0 auto 16px',
+            }}>
+              <Trash2 size={28} />
+            </div>
+            
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 600, color: 'var(--navy-ink)', marginBottom: 8 }}>
+              Delete Task?
+            </h2>
+            
+            <p style={{ fontSize: 13.5, color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 24 }}>
+              Are you sure you want to delete <strong style={{ color: 'var(--text-primary)' }}>{deletingTask.task_code ? `${deletingTask.task_code}: ` : ''}{deletingTask.title}</strong>? This action is permanent and cannot be undone.
+            </p>
+            
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+              <button 
+                className="btn btn-ghost" 
+                onClick={() => setDeletingTask(null)}
+                style={{ minWidth: 100 }}
+              >
+                Cancel
+              </button>
+              <button 
+                className="btn btn-danger" 
+                onClick={async () => {
+                  const id = deletingTask.id
+                  setDeletingTask(null)
+                  await handleDelete(id)
+                }}
+                style={{ minWidth: 120 }}
+              >
+                Delete
               </button>
             </div>
           </div>

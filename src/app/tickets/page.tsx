@@ -22,7 +22,8 @@ export default async function TicketsPage() {
     <TicketsClient
       initialTickets={tickets ?? []}
       currentUserId={user!.id}
-      currentUserName={profile?.full_name ?? user!.email ?? 'Admin'}
+      currentUserName={profile?.full_name ?? user!.email ?? 'User'}
+      currentUserRole={(profile?.role || 'stakeholder') as 'admin' | 'stakeholder'}
       projectId="a1b2c3d4-e5f6-7890-abcd-ef1234567890" // Standard default project ID
       admins={admins ?? []}
     />

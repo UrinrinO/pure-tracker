@@ -260,41 +260,39 @@ export default function Sidebar({ role, userName, collapsed = false, mobileOpen 
           {!collapsed && <span>Notifications</span>}
         </Link>
 
-        {role === 'admin' && (
-          <Link
-            href="/tickets"
-            className={`nav-item ${pathname === '/tickets' || pathname.startsWith('/tickets/') ? 'active' : ''}`}
-            title={collapsed ? "Tickets" : undefined}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: collapsed ? 'center' : 'flex-start',
-              gap: collapsed ? 0 : 10,
-              padding: '10px 12px',
-              borderRadius: 8,
-              color: (pathname === '/tickets' || pathname.startsWith('/tickets/')) ? '#1A335C' : 'rgba(14, 31, 61, 0.6)',
-              background: (pathname === '/tickets' || pathname.startsWith('/tickets/')) ? 'rgba(201, 168, 76, 0.12)' : 'transparent',
-              fontWeight: (pathname === '/tickets' || pathname.startsWith('/tickets/')) ? 600 : 500,
-              fontSize: 13,
-              textDecoration: 'none',
-              transition: 'all 0.15s',
-              borderLeft: (pathname === '/tickets' || pathname.startsWith('/tickets/')) ? '3px solid #C9A84C' : '3px solid transparent',
-              marginTop: 4,
-            }}
-          >
-            <span className="nav-icon" style={{ 
-              width: 18, 
-              height: 18, 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              color: (pathname === '/tickets' || pathname.startsWith('/tickets/')) ? '#C9A84C' : 'inherit'
-            }}>
-              <LifeBuoy size={16} />
-            </span>
-            {!collapsed && <span>Tickets</span>}
-          </Link>
-        )}
+        <Link
+          href="/tickets"
+          className={`nav-item ${pathname === '/tickets' || pathname.startsWith('/tickets/') ? 'active' : ''}`}
+          title={collapsed ? "Tickets" : undefined}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: collapsed ? 'center' : 'flex-start',
+            gap: collapsed ? 0 : 10,
+            padding: '10px 12px',
+            borderRadius: 8,
+            color: (pathname === '/tickets' || pathname.startsWith('/tickets/')) ? '#1A335C' : 'rgba(14, 31, 61, 0.6)',
+            background: (pathname === '/tickets' || pathname.startsWith('/tickets/')) ? 'rgba(201, 168, 76, 0.12)' : 'transparent',
+            fontWeight: (pathname === '/tickets' || pathname.startsWith('/tickets/')) ? 600 : 500,
+            fontSize: 13,
+            textDecoration: 'none',
+            transition: 'all 0.15s',
+            borderLeft: (pathname === '/tickets' || pathname.startsWith('/tickets/')) ? '3px solid #C9A84C' : '3px solid transparent',
+            marginTop: 4,
+          }}
+        >
+          <span className="nav-icon" style={{ 
+            width: 18, 
+            height: 18, 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            color: (pathname === '/tickets' || pathname.startsWith('/tickets/')) ? '#C9A84C' : 'inherit'
+          }}>
+            <LifeBuoy size={16} />
+          </span>
+          {!collapsed && <span>Tickets</span>}
+        </Link>
       </nav>
 
       {/* Sleek expanded logout action in sidebar footer */}

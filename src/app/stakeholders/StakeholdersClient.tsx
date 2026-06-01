@@ -23,6 +23,7 @@ export default function StakeholdersClient({
   const [sent, setSent] = useState(false)
   const [copied, setCopied] = useState<string | null>(null)
   const [error, setError] = useState('')
+  const [revokingInvite, setRevokingInvite] = useState<Invitation | null>(null)
 
   async function sendInvite(e: React.FormEvent) {
     e.preventDefault()
@@ -42,10 +43,20 @@ export default function StakeholdersClient({
       return
     }
 
-    if (data) setInvitations(inv => [data, ...inv])
+    if (data) {
+      setInvitations(inv => [data, ...inv])
+      try {
+        const link = getInviteLink(data.token)
+        await fetch('/api/invite-user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: inviteEmail, inviteLink: link })
+        })
+      } catch (e) {
+        console.error("Failed to automatically send invitation email:", e)
+      }
+    }
 
-    // NOTE: Email sending happens via Edge Function (invite-user)
-    // For now we show the invite link for manual sharing
     setSent(true)
     setSending(false)
     setTimeout(() => {
@@ -67,7 +78,6 @@ export default function StakeholdersClient({
   }
 
   async function revokeInvitation(id: string) {
-    if (!confirm("Are you sure you want to revoke this invitation?")) return
     await supabase.from('invitations').delete().eq('id', id)
     setInvitations(inv => inv.filter(i => i.id !== id))
   }
@@ -185,7 +195,7 @@ export default function StakeholdersClient({
                       {!inv.accepted && (
                         <button
                           className="btn btn-danger btn-icon btn-sm"
-                          onClick={() => revokeInvitation(inv.id)}
+                          onClick={() => setRevokingInvite(inv)}
                           title="Revoke invitation"
                         >
                           <Trash2 size={13} />
@@ -248,6 +258,55 @@ export default function StakeholdersClient({
                 </div>
               </form>
             )}
+          </div>
+        </div>
+      )}
+
+      {revokingInvite && (
+        <div className="modal-overlay" onClick={() => setRevokingInvite(null)}>
+          <div className="modal fade-in" style={{ maxWidth: 400, textAlign: 'center', padding: '32px 24px' }}>
+            <div style={{
+              width: 56,
+              height: 56,
+              borderRadius: '50%',
+              background: 'rgba(180, 69, 47, 0.08)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#B4452F',
+              margin: '0 auto 16px',
+            }}>
+              <X size={28} />
+            </div>
+            
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 600, color: 'var(--navy-ink)', marginBottom: 8 }}>
+              Revoke Invitation?
+            </h2>
+            
+            <p style={{ fontSize: 13.5, color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 24 }}>
+              Are you sure you want to revoke the invitation for <strong style={{ color: 'var(--text-primary)' }}>{revokingInvite.email}</strong>? The recipient will no longer be able to accept it.
+            </p>
+            
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+              <button 
+                className="btn btn-ghost" 
+                onClick={() => setRevokingInvite(null)}
+                style={{ minWidth: 100 }}
+              >
+                Cancel
+              </button>
+              <button 
+                className="btn btn-danger" 
+                onClick={async () => {
+                  const id = revokingInvite.id
+                  setRevokingInvite(null)
+                  await revokeInvitation(id)
+                }}
+                style={{ minWidth: 120 }}
+              >
+                Revoke
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -58,12 +58,14 @@ export default function TicketsClient({
   initialTickets,
   currentUserId,
   currentUserName,
+  currentUserRole = 'stakeholder',
   projectId,
   admins,
 }: {
   initialTickets: Ticket[]
   currentUserId: string
   currentUserName: string
+  currentUserRole: 'admin' | 'stakeholder'
   projectId: string
   admins: Profile[]
 }) {
@@ -302,7 +304,7 @@ export default function TicketsClient({
         author: {
           full_name: currentUserName,
           email: '',
-          role: 'admin'
+          role: currentUserRole
         }
       }
       setReplies(prev => [...prev, tempReply])
@@ -495,13 +497,15 @@ export default function TicketsClient({
                   </select>
                 </div>
                 {/* Assign to developer */}
-                <div className="form-group">
-                  <label className="label">Assign To</label>
-                  <select className="input" value={assignedTo} onChange={e => setAssignedTo(e.target.value)} disabled={uploading}>
-                    <option value="">Select Developer</option>
-                    {admins.map(a => <option key={a.id} value={a.id}>{a.full_name}</option>)}
-                  </select>
-                </div>
+                {currentUserRole === 'admin' && (
+                  <div className="form-group">
+                    <label className="label">Assign To</label>
+                    <select className="input" value={assignedTo} onChange={e => setAssignedTo(e.target.value)} disabled={uploading}>
+                      <option value="">Select Developer</option>
+                      {admins.map(a => <option key={a.id} value={a.id}>{a.full_name}</option>)}
+                    </select>
+                  </div>
+                )}
               </div>
 
               {/* Title */}
@@ -629,7 +633,13 @@ export default function TicketsClient({
               <div style={{ background: 'rgba(14,31,61,0.02)', padding: '14px 18px', borderRadius: 12, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                 <div className="form-group" style={{ margin: 0 }}>
                   <label className="label" style={{ fontSize: 9.5 }}>Update Status</label>
-                  <select className="input" style={{ padding: '6px 10px', height: 'auto', fontSize: 12 }} value={selectedTicket.status} onChange={e => updateTicketStatus(e.target.value as any)}>
+                  <select 
+                    className="input" 
+                    style={{ padding: '6px 10px', height: 'auto', fontSize: 12 }} 
+                    value={selectedTicket.status} 
+                    onChange={e => updateTicketStatus(e.target.value as any)}
+                    disabled={currentUserRole !== 'admin'}
+                  >
                     <option value="open">Open</option>
                     <option value="in_progress">In Progress</option>
                     <option value="resolved">Resolved</option>
@@ -638,7 +648,13 @@ export default function TicketsClient({
                 </div>
                 <div className="form-group" style={{ margin: 0 }}>
                   <label className="label" style={{ fontSize: 9.5 }}>Reassign Developer</label>
-                  <select className="input" style={{ padding: '6px 10px', height: 'auto', fontSize: 12 }} value={selectedTicket.assigned_to || ''} onChange={e => updateTicketAssignee(e.target.value)}>
+                  <select 
+                    className="input" 
+                    style={{ padding: '6px 10px', height: 'auto', fontSize: 12 }} 
+                    value={selectedTicket.assigned_to || ''} 
+                    onChange={e => updateTicketAssignee(e.target.value)}
+                    disabled={currentUserRole !== 'admin'}
+                  >
                     <option value="">Unassigned</option>
                     {admins.map(a => <option key={a.id} value={a.id}>{a.full_name}</option>)}
                   </select>

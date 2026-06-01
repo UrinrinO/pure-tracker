@@ -66,6 +66,7 @@ export default function DocumentsClient({
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [deletingDoc, setDeletingDoc] = useState<DocumentRecord | null>(null)
   
   // Upload form state
   const [title, setTitle] = useState('')
@@ -201,9 +202,7 @@ export default function DocumentsClient({
     }
   }
 
-  // Delete document
   const handleDelete = async (doc: DocumentRecord) => {
-    if (!confirm(`Are you sure you want to delete "${doc.title}"?`)) return
     setDeletingId(doc.id)
 
     try {
@@ -328,7 +327,7 @@ export default function DocumentsClient({
                         {isAdmin && (
                           <button
                             className="btn btn-danger btn-icon btn-sm"
-                            onClick={() => handleDelete(doc)}
+                            onClick={() => setDeletingDoc(doc)}
                             disabled={deletingId === doc.id}
                             title="Delete document"
                           >
@@ -452,6 +451,55 @@ export default function DocumentsClient({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {deletingDoc && (
+        <div className="modal-overlay" onClick={() => setDeletingDoc(null)}>
+          <div className="modal fade-in" style={{ maxWidth: 400, textAlign: 'center', padding: '32px 24px' }}>
+            <div style={{
+              width: 56,
+              height: 56,
+              borderRadius: '50%',
+              background: 'rgba(180, 69, 47, 0.08)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#B4452F',
+              margin: '0 auto 16px',
+            }}>
+              <Trash2 size={28} />
+            </div>
+            
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 600, color: 'var(--navy-ink)', marginBottom: 8 }}>
+              Delete Document?
+            </h2>
+            
+            <p style={{ fontSize: 13.5, color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 24 }}>
+              Are you sure you want to delete <strong style={{ color: 'var(--text-primary)' }}>{deletingDoc.title}</strong>? This will permanently remove the document record and its file.
+            </p>
+            
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+              <button 
+                className="btn btn-ghost" 
+                onClick={() => setDeletingDoc(null)}
+                style={{ minWidth: 100 }}
+              >
+                Cancel
+              </button>
+              <button 
+                className="btn btn-danger" 
+                onClick={async () => {
+                  const doc = deletingDoc
+                  setDeletingDoc(null)
+                  await handleDelete(doc)
+                }}
+                style={{ minWidth: 120 }}
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}
