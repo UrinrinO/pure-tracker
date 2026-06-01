@@ -40,9 +40,12 @@ const adminNav: NavItem[] = [
 ]
 
 const stakeholderNav: NavItem[] = [
-  { href: '/portal',           label: 'Overview',  icon: <Layers size={16} /> },
-  { href: '/portal/documents', label: 'Documents', icon: <FileText size={16} /> },
-  { href: '/portal/messages',  label: 'Messages',  icon: <MessageSquare size={16} /> },
+  { href: '/portal',       label: 'Overview',      icon: <Layers size={16} /> },
+  { href: '/tasks',        label: 'Tasks',         icon: <CheckSquare size={16} /> },
+  { href: '/milestones',   label: 'Milestones',    icon: <Milestone size={16} /> },
+  { href: '/documents',    label: 'Documents',     icon: <FileText size={16} /> },
+  { href: '/stakeholders', label: 'Stakeholders',  icon: <Users size={16} /> },
+  { href: '/messages',     label: 'Messages',      icon: <MessageSquare size={16} /> },
 ]
 
 export default function Sidebar({ role, userName, collapsed = false, mobileOpen = false }: SidebarProps) {

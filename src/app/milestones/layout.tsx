@@ -13,10 +13,10 @@ export default async function MilestonesLayout({ children }: { children: React.R
     .eq('id', user.id)
     .single()
 
-  if (profile?.role !== 'admin') redirect('/portal')
+  const role = (profile?.role || 'stakeholder') as 'admin' | 'stakeholder'
 
   return (
-    <AppLayout role="admin" userName={profile?.full_name ?? user.email ?? 'Admin'}>
+    <AppLayout role={role} userName={profile?.full_name ?? user.email ?? 'User'}>
       {children}
     </AppLayout>
   )

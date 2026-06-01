@@ -17,10 +17,12 @@ export default function TasksClient({
   initialTasks,
   milestones,
   projectId,
+  currentUserRole = 'stakeholder',
 }: {
   initialTasks: Task[]
   milestones: Milestone[]
   projectId: string
+  currentUserRole: 'admin' | 'stakeholder'
 }) {
   const supabase = createClient()
   const [tasks, setTasks] = useState<Task[]>(initialTasks)
@@ -33,6 +35,7 @@ export default function TasksClient({
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
   const [deletingTask, setDeletingTask] = useState<Task | null>(null)
+  const [viewingTask, setViewingTask] = useState<Task | null>(null)
 
   // Sorting state
   const [sortField, setSortField] = useState<string | null>(null)
@@ -190,9 +193,11 @@ export default function TasksClient({
           <h1 className="page-title">Tasks</h1>
           <p className="page-subtitle">{filtered.length} tasks{overdueCount > 0 && ` · ${overdueCount} overdue`}</p>
         </div>
-        <button className="btn btn-primary" onClick={openCreate}>
-          <Plus size={15} /> New Task
-        </button>
+        {currentUserRole === 'admin' && (
+          <button className="btn btn-primary" onClick={openCreate}>
+            <Plus size={15} /> New Task
+          </button>
+        )}
       </div>
 
       <div className="page-body">
@@ -253,7 +258,7 @@ export default function TasksClient({
                 <th className="sort-header" style={{ width: 120 }} onClick={() => handleSort('due_date')}>
                   Due Date {renderSortIndicator('due_date')}
                 </th>
-                <th style={{ width: 80 }}>Actions</th>
+                {currentUserRole === 'admin' && <th style={{ width: 80 }}>Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -266,7 +271,7 @@ export default function TasksClient({
               ) : filtered.map(task => {
                 const overdue = isOverdue(task.due_date, task.status)
                 return (
-                  <tr key={task.id}>
+                  <tr key={task.id} onClick={() => setViewingTask(task)} style={{ cursor: 'pointer' }}>
                     <td>
                       <span style={{ fontSize: 11, fontFamily: 'monospace', color: 'var(--text-muted)' }}>
                         {task.task_code ?? '—'}
@@ -299,10 +304,12 @@ export default function TasksClient({
                       <select
                         value={task.status}
                         onChange={e => updateStatus(task, e.target.value as TaskStatus)}
+                        onClick={e => e.stopPropagation()}
+                        disabled={currentUserRole !== 'admin'}
                         style={{
                           background: 'transparent',
                           border: 'none',
-                          cursor: 'pointer',
+                          cursor: currentUserRole === 'admin' ? 'pointer' : 'default',
                           fontSize: 12,
                           color: task.status === 'done' ? 'var(--status-done)' :
                                  task.status === 'in_progress' ? 'var(--accent)' :
@@ -327,25 +334,27 @@ export default function TasksClient({
                         {formatDate(task.due_date)}
                       </span>
                     </td>
-                    <td>
-                      <div style={{ display: 'flex', gap: 4 }}>
-                        <button
-                          className="btn btn-ghost btn-icon btn-sm"
-                          onClick={() => openEdit(task)}
-                          title="Edit"
-                        >
-                          <Edit2 size={13} />
-                        </button>
-                        <button
-                          className="btn btn-danger btn-icon btn-sm"
-                          onClick={() => setDeletingTask(task)}
-                          disabled={deleting === task.id}
-                          title="Delete"
-                        >
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-                    </td>
+                    {currentUserRole === 'admin' && (
+                      <td>
+                        <div style={{ display: 'flex', gap: 4 }}>
+                          <button
+                            className="btn btn-ghost btn-icon btn-sm"
+                            onClick={(e) => { e.stopPropagation(); openEdit(task); }}
+                            title="Edit"
+                          >
+                            <Edit2 size={13} />
+                          </button>
+                          <button
+                            className="btn btn-danger btn-icon btn-sm"
+                            onClick={(e) => { e.stopPropagation(); setDeletingTask(task); }}
+                            disabled={deleting === task.id}
+                            title="Delete"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 )
               })}
@@ -491,6 +500,98 @@ export default function TasksClient({
                 style={{ minWidth: 120 }}
               >
                 Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {viewingTask && (
+        <div className="modal-overlay" onClick={() => setViewingTask(null)}>
+          <div className="modal fade-in" style={{ maxWidth: 500, padding: 32 }}>
+            <div className="modal-header" style={{ marginBottom: 20 }}>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                <span className="pill-gold" style={{ fontSize: 10.5, fontWeight: 700, padding: '3px 8px', borderRadius: 6 }}>
+                  {viewingTask.task_code || 'Task'}
+                </span>
+                <span className={priorityBadgeClass(viewingTask.priority)} style={{ fontSize: 10.5 }}>
+                  {priorityLabel(viewingTask.priority)}
+                </span>
+              </div>
+              <button className="btn btn-ghost btn-icon" onClick={() => setViewingTask(null)} title="Close">
+                <X size={16} />
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+              <div>
+                <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 600, color: 'var(--navy-ink)', lineHeight: 1.3, marginBottom: 8 }}>
+                  {viewingTask.title}
+                </h2>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <span className={statusBadgeClass(viewingTask.status)} style={{ fontSize: 11 }}>
+                    {statusLabel(viewingTask.status)}
+                  </span>
+                  {viewingTask.milestone?.title && (
+                    <span style={{ fontSize: 12, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                      📁 {viewingTask.milestone.title}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {viewingTask.description && (
+                <div>
+                  <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 6 }}>
+                    Description
+                  </div>
+                  <div style={{ fontSize: 13.5, color: 'var(--navy-ink)', lineHeight: 1.6, background: 'rgba(14,31,61,0.02)', padding: '14px 16px', borderRadius: 12, border: '1px solid rgba(14,31,61,0.04)' }}>
+                    {viewingTask.description}
+                  </div>
+                </div>
+              )}
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+                <div>
+                  <span style={{ display: 'block', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.05em', marginBottom: 2 }}>
+                    Owner / Team
+                  </span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>
+                    👤 {viewingTask.owner || 'Unassigned'}
+                  </span>
+                </div>
+                <div>
+                  <span style={{ display: 'block', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.05em', marginBottom: 2 }}>
+                    Milestone Target
+                  </span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>
+                    📅 {viewingTask.due_date ? formatDate(viewingTask.due_date) : 'No due date'}
+                  </span>
+                </div>
+              </div>
+
+              {viewingTask.start_date && (
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', gap: 12 }}>
+                  <span><b>Start Date:</b> {formatDate(viewingTask.start_date)}</span>
+                  {viewingTask.due_date && <span><b>Due Date:</b> {formatDate(viewingTask.due_date)}</span>}
+                </div>
+              )}
+
+              {viewingTask.notes && (
+                <div style={{ borderTop: '1px solid var(--border)', paddingTop: 14 }}>
+                  <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 6 }}>
+                    Implementation Notes
+                  </div>
+                  <p style={{ fontSize: 12.5, color: 'var(--text-secondary)', lineHeight: 1.5, fontStyle: 'italic' }}>
+                    {viewingTask.notes}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 24, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+              <button className="btn btn-ghost" onClick={() => setViewingTask(null)} style={{ minWidth: 100 }}>
+                Close
               </button>
             </div>
           </div>

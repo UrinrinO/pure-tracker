@@ -9,10 +9,12 @@ export default function StakeholdersClient({
   stakeholders: initial,
   invitations: initialInvites,
   projectId,
+  currentUserRole = 'stakeholder',
 }: {
   stakeholders: Profile[]
   invitations: Invitation[]
   projectId: string
+  currentUserRole: 'admin' | 'stakeholder'
 }) {
   const supabase = createClient()
   const [stakeholders, setStakeholders] = useState<Profile[]>(initial)
@@ -91,9 +93,11 @@ export default function StakeholdersClient({
             {stakeholders.length} active · {invitations.filter(i => !i.accepted).length} pending invitations
           </p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-          <UserPlus size={15} /> Invite Stakeholder
-        </button>
+        {currentUserRole === 'admin' && (
+          <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+            <UserPlus size={15} /> Invite Stakeholder
+          </button>
+        )}
       </div>
 
       <div className="page-body" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -157,7 +161,7 @@ export default function StakeholdersClient({
                   <th>Status</th>
                   <th>Sent</th>
                   <th>Invite Link</th>
-                  <th style={{ width: 60 }}></th>
+                  {currentUserRole === 'admin' && <th style={{ width: 60 }}></th>}
                 </tr>
               </thead>
               <tbody>
@@ -191,17 +195,19 @@ export default function StakeholdersClient({
                         </button>
                       )}
                     </td>
-                    <td>
-                      {!inv.accepted && (
-                        <button
-                          className="btn btn-danger btn-icon btn-sm"
-                          onClick={() => setRevokingInvite(inv)}
-                          title="Revoke invitation"
-                        >
-                          <Trash2 size={13} />
-                        </button>
-                      )}
-                    </td>
+                    {currentUserRole === 'admin' && (
+                      <td>
+                        {!inv.accepted && (
+                          <button
+                            className="btn btn-danger btn-icon btn-sm"
+                            onClick={() => setRevokingInvite(inv)}
+                            title="Revoke invitation"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
