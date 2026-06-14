@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/client'
 import { type Profile, type Invitation } from '@/types/database'
 import { formatDate, getInitials } from '@/lib/utils'
 import { UserPlus, Mail, CheckCircle, Clock, X, Trash2, Copy, Check } from 'lucide-react'
+import DeleteConfirmModal from '@/components/DeleteConfirmModal'
 
 export default function StakeholdersClient({
   stakeholders: initial,
@@ -269,52 +270,13 @@ export default function StakeholdersClient({
       )}
 
       {revokingInvite && (
-        <div className="modal-overlay" onClick={() => setRevokingInvite(null)}>
-          <div className="modal fade-in" style={{ maxWidth: 400, textAlign: 'center', padding: '32px 24px' }}>
-            <div style={{
-              width: 56,
-              height: 56,
-              borderRadius: '50%',
-              background: 'rgba(180, 69, 47, 0.08)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#B4452F',
-              margin: '0 auto 16px',
-            }}>
-              <X size={28} />
-            </div>
-            
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 600, color: 'var(--navy-ink)', marginBottom: 8 }}>
-              Revoke Invitation?
-            </h2>
-            
-            <p style={{ fontSize: 13.5, color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 24 }}>
-              Are you sure you want to revoke the invitation for <strong style={{ color: 'var(--text-primary)' }}>{revokingInvite.email}</strong>? The recipient will no longer be able to accept it.
-            </p>
-            
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-              <button 
-                className="btn btn-ghost" 
-                onClick={() => setRevokingInvite(null)}
-                style={{ minWidth: 100 }}
-              >
-                Cancel
-              </button>
-              <button 
-                className="btn btn-danger" 
-                onClick={async () => {
-                  const id = revokingInvite.id
-                  setRevokingInvite(null)
-                  await revokeInvitation(id)
-                }}
-                style={{ minWidth: 120 }}
-              >
-                Revoke
-              </button>
-            </div>
-          </div>
-        </div>
+        <DeleteConfirmModal
+          title="Revoke Invitation?"
+          message={<>Are you sure you want to revoke the invitation for <strong>{revokingInvite.email}</strong>? The recipient will no longer be able to accept it.</>}
+          confirmLabel="Revoke"
+          onConfirm={async () => { const id = revokingInvite.id; setRevokingInvite(null); await revokeInvitation(id) }}
+          onCancel={() => setRevokingInvite(null)}
+        />
       )}
     </div>
   )

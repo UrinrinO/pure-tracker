@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Sidebar from './Sidebar'
+import CreedsBanner from './CreedsBanner'
 import { Menu, X, Check } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, usePathname } from 'next/navigation'
@@ -129,13 +130,40 @@ export default function AppLayout({ role, userName, children }: AppLayoutProps) 
           transition: 'margin-left 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
         }}>
           <div className="top-navbar-left">
-            <button 
-              className="sidebar-toggle-btn" 
+            <button
+              className="sidebar-toggle-btn"
               onClick={toggleCollapse}
               title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
               <Menu size={16} />
             </button>
+
+            {/* Scripture — extreme left of navbar, after the toggle */}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              paddingLeft: 14,
+              borderLeft: '1.5px solid rgba(201,168,76,0.35)',
+              marginLeft: 6,
+            }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <p style={{
+                  fontFamily: "'Playfair Display', serif",
+                  fontSize: 15,
+                  fontStyle: 'italic',
+                  color: 'rgba(14,31,61,0.75)',
+                  margin: 0,
+                  lineHeight: 1.5,
+                }}>
+                  "This is what the LORD spoke, saying: 'By those who come near Me I must be regarded as holy; And before all the people I must be glorified.'"
+                </p>
+                <span style={{
+                  fontSize: 12.5, fontWeight: 700, letterSpacing: '0.08em',
+                  textTransform: 'uppercase', color: '#C9A84C',
+                }}>
+                  Lev 10:3 NKJV
+                </span>
+              </div>
+            </div>
           </div>
           
           <div className="top-navbar-right">
@@ -309,6 +337,9 @@ export default function AppLayout({ role, userName, children }: AppLayoutProps) 
           </div>
         </div>
       )}
+
+      {/* Floating Creeds Banner — fixed bottom-right, global across all pages */}
+      <CreedsBanner />
     </div>
   )
 }

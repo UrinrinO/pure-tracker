@@ -92,6 +92,32 @@ export interface Invitation {
   created_at: string
 }
 
+// ─── Creeds ──────────────────────────────────────────────────────────────────
+export type CreedType = 'hymn' | 'scripture'
+
+export interface Creed {
+  id: string
+  type: CreedType
+  title: string
+  author: string | null
+  translation: string | null
+  active: boolean
+  order_index: number
+  created_by: string | null
+  created_at: string
+  verses?: CreedVerse[]
+}
+
+export interface CreedVerse {
+  id: string
+  creed_id: string
+  verse_index: number
+  verse_label: string | null
+  content: string
+  translation: string | null  // set on scripture verses; null for hymn stanzas
+  created_at: string
+}
+
 export type Database = {
   public: {
     Tables: {
