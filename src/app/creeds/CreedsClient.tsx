@@ -271,11 +271,11 @@ function CreedDrawer({
           <div>
             <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--gold-deep)', marginBottom: 2 }}>Reflections</div>
             <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 600, color: 'var(--navy-ink)', margin: 0 }}>
-              {isEditing ? 'Edit Creed' : 'Add New Creed'}
+              {isEditing ? 'Edit Reflection' : 'Add New Reflection'}
             </h2>
             {isEditing && (
               <p style={{ fontSize: 12, color: 'var(--ink-3)', margin: '4px 0 0' }}>
-                Type is locked — create a new creed to change it.
+                Type is locked — create a new reflection to change it.
               </p>
             )}
           </div>
@@ -439,7 +439,7 @@ function CreedDrawer({
           </button>
           <button onClick={save} disabled={saving}
             style={{ flex: 2, padding: '11px 0', borderRadius: 10, border: 'none', background: saving ? 'var(--ink-3)' : 'linear-gradient(160deg, #22406E, #1A335C)', color: '#fff', fontSize: 13.5, fontWeight: 600, cursor: saving ? 'default' : 'pointer' }}>
-            {saving ? 'Saving…' : isEditing ? 'Save Changes' : 'Save Creed'}
+            {saving ? 'Saving…' : isEditing ? 'Save Changes' : 'Save Reflection'}
           </button>
         </div>
       </div>
@@ -544,7 +544,7 @@ function CreedRow({ creed, onEdit, onToggle, onDelete }: {
 
       {confirmDelete && (
         <DeleteConfirmModal
-          title="Delete Creed?"
+          title="Delete Reflection?"
           message={<>Are you sure you want to delete <strong>{creed.title}</strong>? This cannot be undone.</>}
           onConfirm={async () => { setConfirmDelete(false); setDeleting(true); await onDelete(creed.id) }}
           onCancel={() => setConfirmDelete(false)}
@@ -598,7 +598,7 @@ export default function CreedsClient({ initialCreeds }: { initialCreeds: Creed[]
           display: 'flex', alignItems: 'center', gap: 7, padding: '10px 18px', borderRadius: 10, border: 'none',
           background: 'linear-gradient(160deg, #22406E, #1A335C)', color: '#fff', fontSize: 13.5, fontWeight: 600, cursor: 'pointer',
         }}>
-          <Plus size={15} /> Add Creed
+          <Plus size={15} /> Add Reflection
         </button>
       </div>
 

@@ -69,25 +69,33 @@ function fmtTime(ms: number) {
 
 function MinimizedPill({ breakLeft, onSkip }: { breakLeft: number; onSkip: () => void }) {
   return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: 10,
-      background: 'rgba(26,51,92,0.92)', backdropFilter: 'blur(8px)',
-      borderRadius: 999, padding: '8px 14px 8px 12px',
-      boxShadow: '0 4px 16px rgba(14,31,61,0.20)',
-    }}>
+    <button
+      onClick={onSkip}
+      title="Open next reflection now"
+      style={{
+        display: 'flex', alignItems: 'center', gap: 10,
+        background: 'rgba(26,51,92,0.92)', backdropFilter: 'blur(8px)',
+        borderRadius: 999, padding: '8px 14px 8px 12px',
+        boxShadow: '0 4px 16px rgba(14,31,61,0.20)',
+        border: 'none', cursor: 'pointer',
+        transition: 'background 0.15s',
+      }}
+      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(26,51,92,1)')}
+      onMouseLeave={e => (e.currentTarget.style.background = 'rgba(26,51,92,0.92)')}
+    >
       <BookHeart size={13} style={{ color: '#C9A84C', flexShrink: 0 }} />
       <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)', whiteSpace: 'nowrap' }}>
         Reflections · next in <strong style={{ color: '#fff' }}>{fmtTime(breakLeft)}</strong>
       </span>
-      <button onClick={onSkip} title="Show next creed now" style={{
-        background: 'rgba(201,168,76,0.20)', border: 'none', cursor: 'pointer',
+      <div style={{
+        background: 'rgba(201,168,76,0.20)',
         borderRadius: '50%', width: 24, height: 24,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: '#C9A84C', flexShrink: 0, padding: 0,
+        color: '#C9A84C', flexShrink: 0,
       }}>
         <SkipForward size={12} />
-      </button>
-    </div>
+      </div>
+    </button>
   )
 }
 
@@ -150,7 +158,7 @@ function CreedCard({
           onMouseLeave={e => e.currentTarget.style.background = 'rgba(26,51,92,0.65)'}
         >
           <SkipBack size={12} />
-          Previous creed
+          Previous reflection
         </button>
       )}
 
@@ -286,7 +294,7 @@ function CreedCard({
           onMouseLeave={e => e.currentTarget.style.background = 'rgba(26,51,92,0.92)'}
         >
           <SkipForward size={12} />
-          Next creed
+          Next reflection
         </button>
       )}
     </div>
@@ -305,8 +313,8 @@ export default function CreedsBanner() {
   } = useCreedStore()
 
   const [isHovered, setIsHovered] = useState(false)
+  const [entering, setEntering] = useState(false)
   const isHoveredRef = useRef(false)
-  const enteringRef  = useRef(true)
 
   const chunks       = buildChunks(creeds)
   const currentChunk = chunks[creedIdx] ?? []
@@ -366,8 +374,8 @@ export default function CreedsBanner() {
 
   // ── Enter animation on creed change ───────────────────────────────────────
   useEffect(() => {
-    enteringRef.current = true
-    const t = setTimeout(() => { enteringRef.current = false }, 50)
+    setEntering(true)
+    const t = setTimeout(() => setEntering(false), 50)
     return () => clearTimeout(t)
   }, [creedIdx, phase])
 
@@ -421,7 +429,7 @@ export default function CreedsBanner() {
             onNextCreed={() => advanceToNextCreed(chunks.length)}
             onPrevCreed={() => advanceToPrevCreed(chunks.length)}
             onDismiss={() => { setPhase('waiting'); setBreakLeft(BREAK_MS) }}
-            entering={enteringRef.current}
+            entering={entering}
             isFirstVerse={isFirstVerse}
             isLastVerse={isLastVerse}
           />
