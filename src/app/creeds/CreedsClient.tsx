@@ -269,7 +269,7 @@ function CreedDrawer({
         {/* Header */}
         <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
           <div>
-            <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--gold-deep)', marginBottom: 2 }}>Our Creeds</div>
+            <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--gold-deep)', marginBottom: 2 }}>Reflections</div>
             <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 600, color: 'var(--navy-ink)', margin: 0 }}>
               {isEditing ? 'Edit Creed' : 'Add New Creed'}
             </h2>
@@ -591,7 +591,7 @@ export default function CreedsClient({ initialCreeds }: { initialCreeds: Creed[]
       <div className="page-header">
         <div>
           <div className="page-eyebrow">Content Management</div>
-          <h1 className="page-title">Our Creeds</h1>
+          <h1 className="page-title">Reflections</h1>
           <p className="page-subtitle">Hymns and scriptures shown on the dashboard</p>
         </div>
         <button onClick={() => setShowAdd(true)} style={{

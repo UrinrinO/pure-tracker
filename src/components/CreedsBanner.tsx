@@ -77,7 +77,7 @@ function MinimizedPill({ breakLeft, onSkip }: { breakLeft: number; onSkip: () =>
     }}>
       <BookHeart size={13} style={{ color: '#C9A84C', flexShrink: 0 }} />
       <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)', whiteSpace: 'nowrap' }}>
-        Our Creeds · next in <strong style={{ color: '#fff' }}>{fmtTime(breakLeft)}</strong>
+        Reflections · next in <strong style={{ color: '#fff' }}>{fmtTime(breakLeft)}</strong>
       </span>
       <button onClick={onSkip} title="Show next creed now" style={{
         background: 'rgba(201,168,76,0.20)', border: 'none', cursor: 'pointer',
@@ -170,7 +170,7 @@ function CreedCard({
           color: isHymn ? '#1A335C' : '#3F6E58',
         }}>
           {isHymn ? <Music size={9} /> : <BookHeart size={9} />}
-          Our Creeds
+          Reflections
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {/* Pause indicator */}
@@ -420,7 +420,7 @@ export default function CreedsBanner() {
             }}
             onNextCreed={() => advanceToNextCreed(chunks.length)}
             onPrevCreed={() => advanceToPrevCreed(chunks.length)}
-            onDismiss={() => setPhase('dismissed')}
+            onDismiss={() => { setPhase('waiting'); setBreakLeft(BREAK_MS) }}
             entering={enteringRef.current}
             isFirstVerse={isFirstVerse}
             isLastVerse={isLastVerse}
