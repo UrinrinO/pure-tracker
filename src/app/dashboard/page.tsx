@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getMilestoneProgress, isOverdue, formatDate, formatDateShort } from '@/lib/utils'
 import { type Task, type Milestone } from '@/types/database'
 import DashboardCharts from '@/components/DashboardCharts'
+import OverdueList from './OverdueList'
 import Link from 'next/link'
 import { AlertTriangle, Clock, CheckCircle2, ListTodo, TrendingUp, ChevronRight } from 'lucide-react'
 
@@ -199,41 +200,14 @@ export default async function DashboardPage() {
                 <p style={{ fontSize: 12.5, margin: 0 }}>No overdue items — well done.</p>
               </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                {overdue.slice(0, 6).map(t => (
-                  <Link
-                    key={t.id}
-                    href={`/tasks?id=${t.id}`}
-                    style={{
-                      padding: '10px 10px',
-                      borderRadius: 10,
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      transition: 'background 0.15s',
-                      borderBottom: '1px solid var(--line)',
-                    }}
-                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--cream-2)')}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                  >
-                    <div>
-                      <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--ink)' }}>
-                        {t.task_code && <span style={{ color: 'var(--ink-3)', marginRight: 6 }}>{t.task_code}</span>}
-                        {t.title}
-                      </div>
-                      <div style={{ fontSize: 11, color: '#B4452F', marginTop: 3 }}>
-                        Due {formatDate(t.due_date)}
-                      </div>
-                    </div>
-                    <span className={`badge badge-${t.priority}`}>{t.priority}</span>
-                  </Link>
-                ))}
+              <>
+                <OverdueList tasks={overdue.slice(0, 6)} />
                 {overdue.length > 6 && (
                   <Link href="/tasks" style={{ fontSize: 12, color: 'var(--gold-deep)', padding: '8px 10px', fontWeight: 500 }}>
                     +{overdue.length - 6} more →
                   </Link>
                 )}
-              </div>
+              </>
             )}
           </div>
 
