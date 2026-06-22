@@ -330,7 +330,7 @@ export default function CreedsBanner() {
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('reflections-pos')
+      const saved = localStorage.getItem('reflections-pos-v2')
       if (saved) setPos(JSON.parse(saved))
     } catch { /* ignore malformed value */ }
   }, [])
@@ -342,8 +342,10 @@ export default function CreedsBanner() {
     d.moved = true
     const PAD = 8
     const SIZE = 60   // keep at least this much of the widget on-screen
-    const x = Math.max(PAD, Math.min(window.innerWidth  - SIZE, e.clientX - d.dx))
-    const y = Math.max(PAD, Math.min(window.innerHeight - SIZE, e.clientY - d.dy))
+    const rightEdge  = e.clientX + d.dx
+    const bottomEdge = e.clientY + d.dy
+    const x = Math.max(PAD, Math.min(window.innerWidth  - SIZE, window.innerWidth  - rightEdge))
+    const y = Math.max(PAD, Math.min(window.innerHeight - SIZE, window.innerHeight - bottomEdge))
     setPos({ x, y })
   }
 
@@ -355,7 +357,7 @@ export default function CreedsBanner() {
     if (d?.moved) {
       justDragged.current = true
       setPos(p => {
-        if (p) localStorage.setItem('reflections-pos', JSON.stringify(p))
+        if (p) localStorage.setItem('reflections-pos-v2', JSON.stringify(p))
         return p
       })
     }
@@ -365,7 +367,7 @@ export default function CreedsBanner() {
   // button). A movement threshold distinguishes a drag from a click/tap.
   function onDragPointerDown(e: React.PointerEvent) {
     const rect = e.currentTarget.getBoundingClientRect()
-    dragState.current = { startX: e.clientX, startY: e.clientY, dx: e.clientX - rect.left, dy: e.clientY - rect.top, moved: false }
+    dragState.current = { startX: e.clientX, startY: e.clientY, dx: rect.right - e.clientX, dy: rect.bottom - e.clientY, moved: false }
     window.addEventListener('pointermove', onDragPointerMove)
     window.addEventListener('pointerup', onDragPointerUp)
   }
@@ -465,7 +467,7 @@ export default function CreedsBanner() {
     <div
       style={{
         position: 'fixed',
-        ...(pos ? { left: pos.x, top: pos.y } : { bottom: 28, right: 28 }),
+        ...(pos ? { right: pos.x, bottom: pos.y } : { bottom: 28, right: 28 }),
         zIndex: 30,
         display: 'flex', flexDirection: 'column', alignItems: 'flex-end',
         pointerEvents: 'none',
