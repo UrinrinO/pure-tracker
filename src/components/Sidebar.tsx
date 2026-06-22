@@ -16,6 +16,7 @@ import {
   FileText,
   LifeBuoy,
   BookHeart,
+  GraduationCap,
 } from 'lucide-react'
 
 interface NavItem {
@@ -36,6 +37,7 @@ const adminNav: NavItem[] = [
   { href: '/tasks',        label: 'Tasks',         icon: <CheckSquare size={16} /> },
   { href: '/milestones',   label: 'Milestones',    icon: <Milestone size={16} /> },
   { href: '/documents',    label: 'Documents',     icon: <FileText size={16} /> },
+  { href: '/training',     label: 'Training',      icon: <GraduationCap size={16} /> },
   { href: '/creeds',       label: 'Reflections',   icon: <BookHeart size={16} /> },
   { href: '/stakeholders', label: 'Stakeholders',  icon: <Users size={16} /> },
   { href: '/messages',     label: 'Messages',      icon: <MessageSquare size={16} /> },
@@ -46,6 +48,7 @@ const stakeholderNav: NavItem[] = [
   { href: '/tasks',        label: 'Tasks',         icon: <CheckSquare size={16} /> },
   { href: '/milestones',   label: 'Milestones',    icon: <Milestone size={16} /> },
   { href: '/documents',    label: 'Documents',     icon: <FileText size={16} /> },
+  { href: '/training',     label: 'Training',      icon: <GraduationCap size={16} /> },
   { href: '/stakeholders', label: 'Stakeholders',  icon: <Users size={16} /> },
   { href: '/messages',     label: 'Messages',      icon: <MessageSquare size={16} /> },
 ]

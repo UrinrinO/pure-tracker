@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { type Notification } from '@/types/database'
 import { timeAgo } from '@/lib/utils'
-import { Bell, AlertTriangle, MessageSquare, Tag, CheckCircle, CheckCheck } from 'lucide-react'
+import { Bell, AlertTriangle, MessageSquare, Tag, CheckCircle, CheckCheck, GraduationCap } from 'lucide-react'
 import Link from 'next/link'
 
 const ICON_MAP = {
@@ -11,6 +11,7 @@ const ICON_MAP = {
   message:         <MessageSquare size={14} style={{ color: 'var(--accent)' }} />,
   mention:         <Tag size={14} style={{ color: 'var(--priority-high)' }} />,
   status:          <CheckCircle size={14} style={{ color: 'var(--status-done)' }} />,
+  training_reminder: <GraduationCap size={14} style={{ color: 'var(--priority-high)' }} />,
 }
 
 export default function NotificationsClient({

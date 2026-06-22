@@ -3,7 +3,8 @@
 export type Role = 'admin' | 'stakeholder'
 export type TaskStatus = 'not_started' | 'in_progress' | 'blocked' | 'done'
 export type TaskPriority = 'low' | 'med' | 'high' | 'critical'
-export type NotificationType = 'behind_schedule' | 'message' | 'mention' | 'status'
+export type NotificationType =
+  | 'behind_schedule' | 'message' | 'mention' | 'status' | 'training_reminder'
 
 export interface Profile {
   id: string
@@ -118,6 +119,58 @@ export interface CreedVerse {
   created_at: string
 }
 
+// ─── Training ──────────────────────────────────────────────────────────────
+export type CourseStatus = 'not_started' | 'in_progress' | 'completed'
+export type ReminderFrequency = 'none' | 'daily' | 'weekly' | 'biweekly' | 'monthly'
+
+export interface TrainingCourse {
+  id: string
+  user_id: string
+  title: string
+  provider: string | null
+  url: string | null
+  description: string | null
+  status: CourseStatus
+  started_at: string | null
+  completed_at: string | null
+  reminder_frequency: ReminderFrequency
+  reminder_time: string
+  reminder_dow: number | null
+  reminder_dom: number | null
+  next_reminder_at: string | null
+  last_reminded_at: string | null
+  order_index: number
+  created_at: string
+  updated_at: string
+  // computed / joined
+  modules?: TrainingModule[]
+  percent_complete?: number
+}
+
+export interface TrainingModule {
+  id: string
+  course_id: string
+  user_id: string
+  title: string
+  order_index: number
+  completed: boolean
+  completed_at: string | null
+  created_at: string
+  // joined
+  notes?: TrainingModuleNote[]
+}
+
+export interface TrainingModuleNote {
+  id: string
+  module_id: string
+  user_id: string
+  title: string
+  body: string
+  order_index: number
+  created_at: string
+  updated_at: string
+}
+
 export type Database = {
   public: {
     Tables: {
@@ -128,6 +181,9 @@ export type Database = {
       comments: { Row: Comment; Insert: Partial<Comment>; Update: Partial<Comment> }
       notifications: { Row: Notification; Insert: Partial<Notification>; Update: Partial<Notification> }
       invitations: { Row: Invitation; Insert: Partial<Invitation>; Update: Partial<Invitation> }
+      training_courses: { Row: TrainingCourse; Insert: Partial<TrainingCourse>; Update: Partial<TrainingCourse> }
+      training_modules: { Row: TrainingModule; Insert: Partial<TrainingModule>; Update: Partial<TrainingModule> }
+      training_module_notes: { Row: TrainingModuleNote; Insert: Partial<TrainingModuleNote>; Update: Partial<TrainingModuleNote> }
     }
   }
 }

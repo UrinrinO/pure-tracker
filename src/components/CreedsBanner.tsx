@@ -316,6 +316,70 @@ export default function CreedsBanner() {
   const [entering, setEntering] = useState(false)
   const isHoveredRef = useRef(false)
 
+  // ── Draggable position ───────────────────────────────────────────────────────
+  // null = use the default bottom-right anchor. Once the user drags it, we store
+  // an absolute {x, y} (top-left) and persist it so it stays put across reloads.
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null)
+  // startX/startY = where the press began (for the move threshold);
+  // dx/dy = pointer offset within the widget; moved = passed the drag threshold.
+  const dragState = useRef<{ startX: number; startY: number; dx: number; dy: number; moved: boolean } | null>(null)
+  // Set briefly after a real drag so the trailing click (e.g. the pill's "skip")
+  // doesn't fire when the user only meant to move the widget.
+  const justDragged = useRef(false)
+  const DRAG_THRESHOLD = 4  // px before a press counts as a drag, so taps still click
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('reflections-pos')
+      if (saved) setPos(JSON.parse(saved))
+    } catch { /* ignore malformed value */ }
+  }, [])
+
+  function onDragPointerMove(e: PointerEvent) {
+    const d = dragState.current
+    if (!d) return
+    if (!d.moved && Math.hypot(e.clientX - d.startX, e.clientY - d.startY) < DRAG_THRESHOLD) return
+    d.moved = true
+    const PAD = 8
+    const SIZE = 60   // keep at least this much of the widget on-screen
+    const x = Math.max(PAD, Math.min(window.innerWidth  - SIZE, e.clientX - d.dx))
+    const y = Math.max(PAD, Math.min(window.innerHeight - SIZE, e.clientY - d.dy))
+    setPos({ x, y })
+  }
+
+  function onDragPointerUp() {
+    window.removeEventListener('pointermove', onDragPointerMove)
+    window.removeEventListener('pointerup', onDragPointerUp)
+    const d = dragState.current
+    dragState.current = null
+    if (d?.moved) {
+      justDragged.current = true
+      setPos(p => {
+        if (p) localStorage.setItem('reflections-pos', JSON.stringify(p))
+        return p
+      })
+    }
+  }
+
+  // Grab anywhere on the widget — including the minimized pill (which is itself a
+  // button). A movement threshold distinguishes a drag from a click/tap.
+  function onDragPointerDown(e: React.PointerEvent) {
+    const rect = e.currentTarget.getBoundingClientRect()
+    dragState.current = { startX: e.clientX, startY: e.clientY, dx: e.clientX - rect.left, dy: e.clientY - rect.top, moved: false }
+    window.addEventListener('pointermove', onDragPointerMove)
+    window.addEventListener('pointerup', onDragPointerUp)
+  }
+
+  // Swallow the click that follows a drag so moving the widget never triggers
+  // the control underneath (skip / dismiss / arrows).
+  function onDragClickCapture(e: React.MouseEvent) {
+    if (justDragged.current) {
+      justDragged.current = false
+      e.preventDefault()
+      e.stopPropagation()
+    }
+  }
+
   const chunks       = buildChunks(creeds)
   const currentChunk = chunks[creedIdx] ?? []
   const currentSlide = currentChunk[verseIdx]
@@ -400,13 +464,17 @@ export default function CreedsBanner() {
   return (
     <div
       style={{
-        position: 'fixed', bottom: 28, right: 28, zIndex: 30,
+        position: 'fixed',
+        ...(pos ? { left: pos.x, top: pos.y } : { bottom: 28, right: 28 }),
+        zIndex: 30,
         display: 'flex', flexDirection: 'column', alignItems: 'flex-end',
         pointerEvents: 'none',
       }}
     >
       <div
-        style={{ pointerEvents: 'auto' }}
+        style={{ pointerEvents: 'auto', touchAction: 'none', cursor: 'grab' }}
+        onPointerDown={onDragPointerDown}
+        onClickCapture={onDragClickCapture}
         onMouseEnter={handleHoverEnter}
         onMouseLeave={handleHoverLeave}
       >
